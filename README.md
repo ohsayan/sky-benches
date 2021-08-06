@@ -13,8 +13,8 @@ To summarize, this is what things look like:
 Reading the graph:
 
 - The bars are in this order: Redis/GET, Skytable/GET and then Redis/SET and Skytable/SET
-- The red shades are that of Redis
-- The blue shades are that of Skytable
+- Light green and yellow bars are those of Redis
+- The blue and dark green bars are those of Skytable
 - The x-axis shows the number of threads
 - The y-axis shows the throughput (operations/sec)
 
