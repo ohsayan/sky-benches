@@ -6,7 +6,7 @@ This is **an early benchmark** of [Skytable](https://github.com/skytable/skytabl
 
 To summarize, this is what things look like:
 
-<img src="nonum.png" height="auto" width="100%" alt="Benchmark">
+<img src="nonum.jpg" height="auto" width="100%" alt="Benchmark">
 
 (click to see an enlarged image)
 
@@ -17,8 +17,6 @@ Reading the graph:
 - The blue shades are that of Skytable
 - The x-axis shows the number of threads
 - The y-axis shows the throughput (operations/sec)
-
-If you like a numbered graph, [see this](withnum.png)
 
 ## Machine
 
