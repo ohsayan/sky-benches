@@ -18,6 +18,9 @@ Reading the graph:
 - The x-axis shows the number of threads
 - The y-axis shows the throughput (operations/sec)
 
+> **Seeing the _weird throughput bump_?**  
+> Yes, I'm aware of the issue, and I will try to fix the fluctuation issue in an upcoming release.
+
 ## Machine
 
 Output of `lscpu` (trimmed):
