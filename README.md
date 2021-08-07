@@ -2,11 +2,13 @@
 
 ## Benchmark summary
 
-This is **an early benchmark** of [Skytable](https://github.com/skytable/skytable) and [Redis](https://github.com/redis/redis) and might have some minimal _glitches_. The intention here is to see how fast each database is, out-of-the-box without any added customizations. Skytable uses multi-threaded I/O and so does Redis.
+This is **an early benchmark** of [Skytable](https://github.com/skytable/skytable) and [Redis](https://github.com/redis/redis) and [KeyDB](https://github.com/EQ-Alpha/KeyDB). It might have some minimal _glitches_. The intention here is to see how fast each database is, out-of-the-box without any added customizations. Skytable uses multi-threaded I/O and so do Redis and KeyDB.
 
 To summarize, this is what things look like:
 
-<img src="nonum.jpg" height="auto" width="100%" alt="Benchmark">
+<img src="get-benches.png" height="auto" width="100%" alt="Benchmark">
+
+<img src="set-benches.png" height="auto" width="100%" alt="Benchmark">
 
 (click to see an enlarged image)
 
@@ -18,8 +20,12 @@ Reading the graph:
 - The x-axis shows the number of threads
 - The y-axis shows the throughput (operations/sec)
 
-> **Seeing the _weird throughput bump_?**  
+> ## Notes
+>
+> 1: **Seeing the _weird throughput bump_?**  
 > Yes, I'm aware of the issue, and I will try to fix the fluctuation issue in an upcoming release.
+>
+> 2: **The KeyDB benchmark is still experimental**
 
 ## Machine
 
@@ -420,3 +426,12 @@ Here's what I got:
 Gets: 154521.92
 Sets: 134145.84
 ```
+
+## Contributing
+
+Ofcourse! If you find errors or possible sources of error
+in any of the benchmarks, please consider opening an issue.
+
+## License
+
+Distributed under the [MIT License](./LICENSE).
