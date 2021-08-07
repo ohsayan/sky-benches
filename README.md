@@ -182,6 +182,8 @@ unzip sky-bundle-v0.6.4-x86_64-linux-gnu.zip
 
 To start Skytable, we'll simply run `./skyd &` to keep it in the background. Like the other benchmark, we'll trim output to only keep what's necessary. Also the number of threads for the benchmark in Skytable is determined by the number of clients, so we don't have to explicitly specify the number of threads.
 
+### Benchmarking Skytable
+
 **Bench 1: 1 client, 1 thread**
 
 ```sh
@@ -270,4 +272,148 @@ Output:
   { "report": "GET", "stat": 359502.86118081387 },
   { "report": "SET", "stat": 371029.6102851901 }
 ]
+```
+
+## Benchmarking KeyDB
+
+Please note that the KeyDB benchmark is **still experimental**.
+
+### Installing KeyDB
+
+We'll download and install the latest KeyDB release at this time from [this link](https://github.com/EQ-Alpha/KeyDB/releases/tag/v6.0.16).
+
+```sh
+wget https://github.com/EQ-Alpha/KeyDB/archive/refs/tags/v6.0.16.zip
+unzip v06.0.16.zip
+cd KeyDB-6.0.16 && sudo make install
+```
+
+We'll start KeyDB by running: `keydb-server --server-threads 16 &`, explicitly telling the server
+to use 16 threads (since we have 16 vCPUs).
+
+Do note that both KeyDB requires a number of libraries that need to be installed (the package names are for Ubuntu):
+
+- libcurl4-openssl-dev
+- uuid-dev
+
+### Installing Memtier
+
+[As recommended in the documentation](https://docs.keydb.dev/docs/benchmarking/), we will use the
+[memtier benchmark tool](https://github.com/RedisLabs/memtier_benchmark) from Redis Labs to benchmark KeyDB.
+
+```sh
+sudo apt-get install build-essential autoconf automake libpcre3-dev libevent-dev pkg-config zlib1g-dev
+git clone https://github.com/RedisLabs/memtier_benchmark.git
+cd memtier_benchmark
+autoreconf -ivf
+./configure
+sudo make install
+```
+
+For memtier, we have to specify the ratio of sets:gets. We will do them individually to get the best numbers.
+So we do `0:1` when we want all GETs and `1:0` when we want all sets.
+Also `-c1` means one client per thread (similar to `sky-bench`). We'll also use the defaults to get the highest benchmarks.
+
+### Benchmarking KeyDB
+
+**Bench 1: 1 thread/1 client**
+
+```sh
+memtier_benchmark --ratio=0:1 -c1 -t1
+memtier_benchmark --ratio=1:0 -c1 -t1
+```
+
+Output:
+
+```
+Gets: 15004.47
+Sets: 15194.45
+```
+
+**Bench 2: 2 threads/2 clients**
+
+```sh
+memtier_benchmark --ratio=0:1 -c1 -t2
+memtier_benchmark --ratio=1:0 -c1 -t2
+```
+
+Output:
+
+```
+Gets: 31362.12
+Sets: 30857.25
+```
+
+**Bench 3: 5 threads/5 clients**
+
+```sh
+memtier_benchmark --ratio=0:1 -c1 -t5
+memtier_benchmark --ratio=1:0 -c1 -t5
+```
+
+Output:
+
+```
+Gets: 42831.69
+Sets: 46195.78
+```
+
+**Bench 4: 10 threads/10 clients**
+
+```sh
+memtier_benchmark --ratio=0:1 -c1 -t10
+memtier_benchmark --ratio=1:0 -c1 -t10
+```
+
+Output:
+
+```
+Gets: 44949.32
+Sets: 43732.82
+```
+
+**Bench 5: 20 threads/20 clients**
+
+```sh
+memtier_benchmark --ratio=0:1 -c1 -t20
+memtier_benchmark --ratio=1:0 -c1 -t20
+```
+
+Output:
+
+```
+Gets: 48612.15
+Sets: 47622.22
+```
+
+**Bench 6: 30 threads/30 clients**
+
+```sh
+memtier_benchmark --ratio=0:1 -c1 -t30
+memtier_benchmark --ratio=1:0 -c1 -t30
+```
+
+Output:
+
+```
+Gets: 133929.23
+Sets: 143908.91
+```
+
+### For the adventurous
+
+I wanted to see how high we could go with KeyDB, so I tried this:
+
+```sh
+memtier_benchmark --ratio=0:1 -c50 -t30
+memtier_benchmark --ratio=1:0 -c50 -t30
+```
+
+Equivalent to 50 connections per thread \* 30 threads = 1500 connections. (`-c50` is the default according to the help menu)
+
+Here's what I got:
+
+```
+Gets: 154521.92
+Sets: 134145.84
 ```
