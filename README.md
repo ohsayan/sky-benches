@@ -2,7 +2,7 @@
 
 ## Benchmark summary
 
-This is **an early benchmark** of [Skytable](https://github.com/skytable/skytable) and [Redis](https://github.com/redis/redis) and [KeyDB](https://github.com/EQ-Alpha/KeyDB). It might have some minimal _glitches_. The intention here is to see how fast each database is, out-of-the-box without any added customizations. Skytable uses multi-threaded I/O and so do Redis and KeyDB.
+This is **an early benchmark** of [Skytable](https://github.com/skytable/skytable), [Redis](https://github.com/redis/redis) and [KeyDB](https://github.com/EQ-Alpha/KeyDB). It might have some minimal _glitches_. The intention here is to see how fast each database is, out-of-the-box without any added customizations. Skytable uses multi-threaded I/O and so do Redis and KeyDB.
 
 To summarize, this is what things look like:
 
@@ -23,6 +23,21 @@ Reading the graph:
 > Yes, I'm aware of the issue, and I will try to fix the fluctuation issue in an upcoming release.
 >
 > 2: **The KeyDB benchmark is still experimental**
+
+## Procedure
+
+For running each benchmark:
+
+1. The source code was downloaded and compiled (if required)
+2. The machine was allowed to _cool down_ for exactly 1 hour after a reboot to try and reduce nondeterministic cases
+3. The benchmark was run
+
+Jump to:
+
+- [Machine specs](#machine)
+- [Redis benchmark procedure](#benchmarking-redis)
+- [Skytable benchmark procedure](#benchmarking-skytable)
+- [KeyDB benchmark procedure](#benchmarking-keydb)
 
 ## Machine
 
@@ -297,7 +312,7 @@ cd KeyDB-6.0.16 && sudo make install
 We'll start KeyDB by running: `keydb-server --server-threads 16 &`, explicitly telling the server
 to use 16 threads (since we have 16 vCPUs).
 
-Do note that both KeyDB requires a number of libraries that need to be installed (the package names are for Ubuntu):
+Do note that KeyDB requires a number of libraries that need to be installed (the package names are for Ubuntu):
 
 - libcurl4-openssl-dev
 - uuid-dev
