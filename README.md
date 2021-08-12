@@ -1,5 +1,7 @@
 # Skytable v/s the rest
 
+> More comprehensive and thorough benchmarks will be published soon. Please wait till then!
+
 ## Benchmark summary
 
 This is **an early benchmark** of [Skytable](https://github.com/skytable/skytable), [Redis](https://github.com/redis/redis) and [KeyDB](https://github.com/EQ-Alpha/KeyDB). It might have some minimal _glitches_. The intention here is to see how fast each database is, out-of-the-box without any added customizations. Skytable uses multi-threaded I/O and so do Redis and KeyDB.
@@ -23,6 +25,8 @@ Reading the graph:
 > Yes, I'm aware of the issue, and I will try to fix the fluctuation issue in an upcoming release.
 >
 > 2: **The KeyDB benchmark is still experimental**
+> 
+> 3: **No pipelining was used in any benchmark** (Skytable's pipeline queries are currently under development)
 
 ## Procedure
 
