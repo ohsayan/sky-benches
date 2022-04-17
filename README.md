@@ -1,6 +1,6 @@
 # Skytable v/s the rest
 
-> More comprehensive and thorough benchmarks will be published soon. Please wait till then!
+> More comprehensive and thorough benchmarks will be published soon. Please wait till then! **[Read the benchmark notes](#notes)**!
 
 ## Benchmark summary
 
@@ -25,8 +25,16 @@ Reading the graph:
 > Yes, I'm aware of the issue, and I will try to fix the fluctuation issue in an upcoming release.
 >
 > 2: **The KeyDB benchmark is still experimental**
-> 
+>
 > 3: **No pipelining was used in any benchmark** (Skytable's pipeline queries are currently under development)
+>
+> 4: **Key/value sizes are different!**
+>
+> - **Redis uses 3 byte** k/v sizes
+> - **Skytable uses 4 byte** k/v sizes
+> - **KeyDB** uses an unspecified k/v size (memtier doesn't say much about it; I couldn't find any appropriate documentation)
+>
+> 5: **Average values were taken**
 
 ## Procedure
 
@@ -48,41 +56,42 @@ Jump to:
 Output of `lscpu` (trimmed):
 
 ```
+ubuntu@ip-172-31-13-51:~$ lscpu
 Architecture:                    x86_64
 CPU op-mode(s):                  32-bit, 64-bit
 Byte Order:                      Little Endian
-Address sizes:                   40 bits physical, 48 bits virtual
-CPU(s):                          16
-On-line CPU(s) list:             0-15
-Thread(s) per core:              1
+Address sizes:                   46 bits physical, 48 bits virtual
+CPU(s):                          32
+On-line CPU(s) list:             0-31
+Thread(s) per core:              2
 Core(s) per socket:              16
 Socket(s):                       1
 NUMA node(s):                    1
 Vendor ID:                       GenuineIntel
-CPU family:                      15
-Model:                           6
-Model name:                      Common KVM processor
-Stepping:                        1
-CPU MHz:                         2199.998
-BogoMIPS:                        4399.99
+CPU family:                      6
+Model:                           85
+Model name:                      Intel(R) Xeon(R) Platinum 8259CL CPU @ 2.50GHz
+Stepping:                        7
+CPU MHz:                         3189.320
+BogoMIPS:                        5000.00
 Hypervisor vendor:               KVM
 Virtualization type:             full
 L1d cache:                       512 KiB
 L1i cache:                       512 KiB
-L2 cache:                        64 MiB
-L3 cache:                        16 MiB
+L2 cache:                        16 MiB
+L3 cache:                        35.8 MiB
 ```
 
 Output of `uname -a`:
 
 ```
-Linux sky-us-central 5.4.0-74-generic #83-Ubuntu SMP Sat May 8 02:35:39 UTC 2021 x86_64 x86_64 x86_64 GNU/Linux
+Linux ip-172-31-13-51 5.8.0-1042-aws #44~20.04.1-Ubuntu SMP Mon Aug 2 11:25:34 UTC 2021 x86_64 x86_64 x86_64 GNU/Linux
 ```
 
 Output of `cat /proc/meminfo | grep MemTotal`:
 
 ```
-MemTotal:       16395300 kB
+MemTotal:       130415620 kB
 ```
 
 Output of `lsb_release -a`:
@@ -96,7 +105,7 @@ Codename:	focal
 ```
 
 **Summary**
-So we have a 16-Core VM running Ubuntu 20.04.2 with 16GB RAM.
+So we have a 16-Core VM (32 threads due to hyperthreading) running Ubuntu 20.04.2 with 130.4GB RAM.
 
 ## Benchmarking Redis
 
@@ -108,7 +117,7 @@ tar -xf redis-6.2.5.tar.gz
 cd redis-6.2.5 && sudo make install
 ```
 
-Now that Redis is installed, let's benchmark `GET` and `SET` in Redis. First start the server (simply `redis-server &` to run it in the background). We'll pass `--csv` to avoid too much output and only show the
+Now that Redis is installed, let's benchmark `GET` and `SET` in Redis. First start the server (simply `redis-server --io-threads 16 &` to run it in the background). We'll pass `--csv` to avoid too much output and only show the
 required section of output.
 
 ### Benchmarking Redis
@@ -122,8 +131,8 @@ redis-benchmark -t set,get -n 100000 -c 1 --threads 1 --csv
 Output:
 
 ```
-"SET","16603.02"
-"GET","15873.02"
+"SET","35778.18"
+"GET","35919.54"
 ```
 
 **Bench 2: 2 clients, 2 threads**
@@ -135,8 +144,8 @@ redis-benchmark -t set,get -n 100000 -c 2 --threads 2 --csv
 Output:
 
 ```
-"SET","36350.42"
-"GET","30759.77"
+"SET","79936.05"
+"GET","79936.05"
 ```
 
 **Bench 3: 5 clients, 5 threads**
@@ -148,8 +157,8 @@ redis-benchmark -t set,get -n 100000 -c 5 --threads 5 --csv
 Output:
 
 ```
-"SET","44404.97"
-"GET","44404.97"
+"SET","99900.09"
+"GET","99900.09"
 ```
 
 **Bench 4: 10 clients, 10 threads**
@@ -161,8 +170,8 @@ redis-benchmark -t set,get -n 100000 -c 10 --threads 10 --csv
 Output:
 
 ```
-"SET","39936.10"
-"GET","44385.27"
+"SET","99900.09"
+"GET","99900.09"
 ```
 
 **Bench 5: 20 clients, 20 threads**
@@ -174,8 +183,8 @@ redis-benchmark -t set,get -n 100000 -c 20 --threads 20 --csv
 Output:
 
 ```
-"SET","44385.27"
-"GET","39920.16"
+"SET","99800.40"
+"GET","99800.09"
 ```
 
 **Bench 6: 30 clients, 30 threads**
@@ -187,27 +196,25 @@ redis-benchmark -t set,get -n 100000 -c 30 --threads 30 --csv
 Output:
 
 ```
-"SET","39904.23"
-"GET","39777.25"
+"SET","132450.33"
+"GET","131926.12"
 ```
 
 ## Benchmarking Skytable
 
-We'll use the latest stable Skytable release (v0.6.4)
-for benchmarking.
+We'll use the latest stable Skytable version off `next` (commit a1ea9c31114)
 
 ### Installing Skytable
 
-Skytable comes with pre-built binaries by default, unlike Redis that requires you to manually build the binaries. So we'll go ahead and download it.
+Skytable comes with pre-built binaries by default, unlike Redis that requires you to manually build the binaries. However, as we're benchmarking off the latest commit, we'll need to build it.
 
 ```sh
-wget https://github.com/skytable/skytable/releases/download/v0.6.4/sky-bundle-v0.6.4-x86_64-linux-gnu.zip
-unzip sky-bundle-v0.6.4-x86_64-linux-gnu.zip
+cargo build --release && cd target/release/skytable
 ```
 
-To start Skytable, we'll simply run `./skyd &` to keep it in the background. Like the other benchmark, we'll trim output to only keep what's necessary. Also the number of threads for the benchmark in Skytable is determined by the number of clients, so we don't have to explicitly specify the number of threads.
-
 ### Benchmarking Skytable
+
+To start Skytable, we'll simply run `./skyd &` to keep it in the background. Like the other benchmark, we'll trim output to only keep what's necessary. Also the number of threads for the benchmark in Skytable is determined by the number of clients, so we don't have to explicitly specify the number of threads.
 
 **Bench 1: 1 client, 1 thread**
 
@@ -219,8 +226,8 @@ Output:
 
 ```json
 [
-  { "report": "GET", "stat": 19243.486447917167 },
-  { "report": "SET", "stat": 19966.21511150442 }
+  { "report": "GET", "stat": 35819.636414 },
+  { "report": "SET", "stat": 35524.728037 }
 ]
 ```
 
@@ -234,8 +241,8 @@ Output:
 
 ```json
 [
-  { "report": "GET", "stat": 38582.11281719525 },
-  { "report": "SET", "stat": 36313.763793128164 }
+  { "report": "GET", "stat": 82489.2301145 },
+  { "report": "SET", "stat": 83473.0270512 }
 ]
 ```
 
@@ -249,8 +256,8 @@ Output:
 
 ```json
 [
-  { "report": "GET", "stat": 44292.0943448734 },
-  { "report": "SET", "stat": 46593.50782686504 }
+  { "report": "GET", "stat": 200557.406392 },
+  { "report": "SET", "stat": 198217.313562 }
 ]
 ```
 
@@ -264,8 +271,8 @@ Output:
 
 ```json
 [
-  { "report": "GET", "stat": 78869.86997358651 },
-  { "report": "SET", "stat": 90033.9936397916 }
+  { "report": "GET", "stat": 318038.853356 },
+  { "report": "SET", "stat": 316238.431393 }
 ]
 ```
 
@@ -279,8 +286,8 @@ Output:
 
 ```json
 [
-  { "report": "GET", "stat": 346012.6880153796 },
-  { "report": "SET", "stat": 341191.7935116819 }
+  { "report": "GET", "stat": 361300.582958 },
+  { "report": "SET", "stat": 362723.490174 }
 ]
 ```
 
@@ -294,8 +301,8 @@ Output:
 
 ```json
 [
-  { "report": "GET", "stat": 359502.86118081387 },
-  { "report": "SET", "stat": 371029.6102851901 }
+  { "report": "GET", "stat": 446146.100598 },
+  { "report": "SET", "stat": 432186.17602 }
 ]
 ```
 
@@ -305,16 +312,17 @@ Please note that the KeyDB benchmark is **still experimental**.
 
 ### Installing KeyDB
 
-We'll download and install the latest KeyDB release at this time from [this link](https://github.com/EQ-Alpha/KeyDB/releases/tag/v6.0.16).
+We'll download and install the latest KeyDB release at this time from [this link](https://github.com/EQ-Alpha/KeyDB/releases/tag/v6.2.0).
 
 ```sh
-wget https://github.com/EQ-Alpha/KeyDB/archive/refs/tags/v6.0.16.zip
-unzip v06.0.16.zip
-cd KeyDB-6.0.16 && sudo make install
+wget https://github.com/EQ-Alpha/KeyDB/archive/refs/tags/v6.2.0.zip
+unzip v6.2.0.zip
+cd KeyDB-6.2.0 && sudo make install
 ```
 
 We'll start KeyDB by running: `keydb-server --server-threads 16 &`, explicitly telling the server
-to use 16 threads (since we have 16 vCPUs).
+to use 16 threads (since we have 16 vCPUs, and
+`keydb-server` won't allow us to pass 32).
 
 Do note that KeyDB requires a number of libraries that need to be installed (the package names are for Ubuntu):
 
@@ -351,8 +359,8 @@ memtier_benchmark --ratio=1:0 -c1 -t1
 Output:
 
 ```
-Gets: 15004.47
-Sets: 15194.45
+Gets: 33873
+Sets: 33004
 ```
 
 **Bench 2: 2 threads/2 clients**
@@ -365,8 +373,8 @@ memtier_benchmark --ratio=1:0 -c1 -t2
 Output:
 
 ```
-Gets: 31362.12
-Sets: 30857.25
+Gets: 86279
+Sets: 85667
 ```
 
 **Bench 3: 5 threads/5 clients**
@@ -379,8 +387,8 @@ memtier_benchmark --ratio=1:0 -c1 -t5
 Output:
 
 ```
-Gets: 42831.69
-Sets: 46195.78
+Gets: 105218
+Sets: 103589
 ```
 
 **Bench 4: 10 threads/10 clients**
@@ -393,8 +401,8 @@ memtier_benchmark --ratio=1:0 -c1 -t10
 Output:
 
 ```
-Gets: 44949.32
-Sets: 43732.82
+Gets: 116394
+Sets: 115647
 ```
 
 **Bench 5: 20 threads/20 clients**
@@ -407,8 +415,8 @@ memtier_benchmark --ratio=1:0 -c1 -t20
 Output:
 
 ```
-Gets: 48612.15
-Sets: 47622.22
+Gets: 113154
+Sets: 110729
 ```
 
 **Bench 6: 30 threads/30 clients**
@@ -421,26 +429,8 @@ memtier_benchmark --ratio=1:0 -c1 -t30
 Output:
 
 ```
-Gets: 133929.23
-Sets: 143908.91
-```
-
-### For the adventurous
-
-I wanted to see how high we could go with KeyDB, so I tried this:
-
-```sh
-memtier_benchmark --ratio=0:1 -c50 -t30
-memtier_benchmark --ratio=1:0 -c50 -t30
-```
-
-Equivalent to 50 connections per thread \* 30 threads = 1500 connections. (`-c50` is the default according to the help menu)
-
-Here's what I got:
-
-```
-Gets: 154521.92
-Sets: 134145.84
+Gets: 196542
+Sets: 203297
 ```
 
 ## Contributing
