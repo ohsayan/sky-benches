@@ -209,7 +209,7 @@ We'll use the latest stable Skytable version off `next` (commit a1ea9c31114)
 Skytable comes with pre-built binaries by default, unlike Redis that requires you to manually build the binaries. However, as we're benchmarking off the latest commit, we'll need to build it.
 
 ```sh
-cargo build --release && cd target/release/skytable
+cargo build --release && cd target/release
 ```
 
 ### Benchmarking Skytable
