@@ -228,7 +228,7 @@ unzip sky-bundle-v0.7.5-x86_64-linux-gnu.zip
 
 ### Benchmarking Skytable
 
-To start Skytable, we'll simply run `./skyd &` to keep it in the background. Like the other benchmark, we'll trim output to only keep what's necessary. Also the number of threads for the benchmark in Skytable is determined by the number of clients, so we don't have to explicitly specify the number of threads.
+To start Skytable, we'll simply run `./skyd`. Like the other benchmarks, we'll trim output to only keep what's necessary. Also the number of threads for the benchmark in Skytable is determined by the number of clients, so we don't have to explicitly specify the number of threads.
 
 **Bench 1: 1 client, 1 thread**
 
@@ -356,7 +356,7 @@ unzip v6.2.2.zip
 cd KeyDB-6.2.2 && sudo make install
 ```
 
-We'll start KeyDB by running: `keydb-server --server-threads 16 &`, explicitly telling the server to use 16 threads (since we have 16 vCPUs).
+We'll start KeyDB by running: `keydb-server --server-threads 16`, explicitly telling the server to use 16 threads (since we have 16 vCPUs).
 
 Do note that KeyDB requires a number of libraries that need to be installed (the package names are for Ubuntu):
 
