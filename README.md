@@ -35,6 +35,9 @@ Reading the graph:
 > - **KeyDB** uses an unspecified k/v size (memtier doesn't say much about it; I couldn't find any appropriate documentation)
 >
 > 5: **Average values were taken**
+>
+> 6: **Skytable does an extra check:** Skytable's `SET` is not like Redis's/KeyDB's `SET`. It does
+> an additional check to see if the key is new (much like `SETNX`)
 
 ## Procedure
 
