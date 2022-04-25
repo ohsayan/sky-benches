@@ -351,7 +351,7 @@ Please note that the KeyDB benchmark is **still experimental**.
 
 ### Installing KeyDB
 
-We'll download and install the latest KeyDB release at this time from [this link](https://github.com/EQ-Alpha/KeyDB/releases/tag/v6.2.0).
+We'll download and install the latest KeyDB release at this time from [this link](https://github.com/EQ-Alpha/KeyDB/releases/tag/v6.2.2).
 
 ```sh
 wget https://github.com/EQ-Alpha/KeyDB/archive/refs/tags/v6.2.2.zip
