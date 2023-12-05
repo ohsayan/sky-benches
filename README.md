@@ -59,6 +59,10 @@ The goal here is to see how [Skytable](https://github.com/skytable/skytable), wh
     - Ubuntu 22.04
     - Kernel: 5.19.0-42-generic
     - Governor: `performance` (checking `cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor`)
+  - **Database versions**:
+    - Skytable v0.8.0-beta
+    - Redis `master` (991aff1)
+    - KeyDB `master` (674d9fb)
 
 ## How the benchmarks were run
 
